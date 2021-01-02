@@ -21,6 +21,7 @@ from typing import Iterable, List
 I3_CONFIG_FILE = os.path.expanduser("~/.config/i3/config")
 
 Mode = enum.Enum("Mode", ("WORK", "REC", "ALL"))
+# TODO: Switch to whitelist
 DISABLED_WS_IDS_BY_MODE = {Mode.WORK: (3, 6), Mode.REC: (1, 4, 5), Mode.ALL: ()}
 
 ALL_WSES = tuple(range(1, 11))
@@ -28,14 +29,14 @@ ALL_WSES = tuple(range(1, 11))
 
 def _is_enabling_ln(ws_ids: int, ln: str):
     """ Returns whether `ln` is the line enabling the ws identified by `ws_id` """
-    # The shortcut for workspace 10 is 0
     ws_ids_pattern = "(" + "|".join(map(str, ws_ids)) + ")"
-    re_pattern = ".*bindsym \$mod\+. workspace number {}.*".format(ws_ids_pattern)
+    re_pattern = ".*bindsym \$mod\+. workspace number {} .*".format(ws_ids_pattern)
     re_match = re.match(re_pattern, ln)
     return re_match is not None
 
 
 def _is_disabling_ln(ws_ids: int, ln: str) -> bool:
+    # The shortcut for workspace 10 is 0
     shortcuts = [(0 if ws_id == 10 else ws_id)  for ws_id in ws_ids]
     shortcuts_pattern = "(" + "|".join(map(str, shortcuts)) + ")"
     re_pattern = ".*bindsym \$mod\+{} exec :.*".format(shortcuts_pattern)
@@ -48,7 +49,7 @@ def _turn_on_ln(ln: str) -> str:
 
 
 def _turn_off_ln(ln: str) -> str:
-    # Enable the line to normalize it, then disable it.
+    # Turn the line on to normalize it, then disable it.
     return "# " + _turn_on_ln(ln)
 
 
@@ -63,9 +64,9 @@ def switch_wses(
     del config_lns
 
     # Enabling lines are turned on and disabling lines are turned off
-    # The function to apply to ws-enabling lines
-    disabling_change_fn = _turn_off_ln if enable else _turn_on_ln
     # The function to apply to ws-disabling lines
+    disabling_change_fn = _turn_off_ln if enable else _turn_on_ln
+    # The function to apply to ws-enabling lines
     enabling_change_fn = _turn_on_ln if enable else _turn_off_ln
 
     for i_ln, ln in enumerate(out_lines):
