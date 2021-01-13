@@ -20,9 +20,14 @@ from typing import Iterable, List
 
 I3_CONFIG_FILE = os.path.expanduser("~/.config/i3/config")
 
-Mode = enum.Enum("Mode", ("WORK", "REC", "ALL"))
+Mode = enum.Enum("Mode", ("WORK", "REC", "FOCUS", "ALL"))
 # TODO: Switch to whitelist
-DISABLED_WS_IDS_BY_MODE = {Mode.WORK: (3, 6), Mode.REC: (1, 4, 5), Mode.ALL: ()}
+DISABLED_WS_IDS_BY_MODE = {
+    Mode.WORK: (3, 6),
+    Mode.REC: (1, 4, 5),
+    Mode.FOCUS: (1, 3, 6),
+    Mode.ALL: ()
+}
 
 ALL_WSES = tuple(range(1, 11))
 
