@@ -16,17 +16,18 @@ import subprocess
 import re
 import sys
 
-from typing import Iterable, List
+from typing import Iterable, List, Tuple
 
 I3_CONFIG_FILE = os.path.expanduser("~/.config/i3/config")
 
 Mode = enum.Enum("Mode", ("WORK", "REC", "FOCUS", "ALL"))
 # TODO: Switch to whitelist
+# Custom modes consist of a comma-separated list of numbers, specifying a whitelist of WSes
 DISABLED_WS_IDS_BY_MODE = {
     Mode.WORK: (3, 6),
     Mode.REC: (1, 4, 5),
     Mode.FOCUS: (1, 3, 6),
-    Mode.ALL: ()
+    Mode.ALL: (),
 }
 
 ALL_WSES = tuple(range(1, 11))
@@ -42,7 +43,7 @@ def _is_enabling_ln(ws_ids: int, ln: str):
 
 def _is_disabling_ln(ws_ids: int, ln: str) -> bool:
     # The shortcut for workspace 10 is 0
-    shortcuts = [(0 if ws_id == 10 else ws_id)  for ws_id in ws_ids]
+    shortcuts = [(0 if ws_id == 10 else ws_id) for ws_id in ws_ids]
     shortcuts_pattern = "(" + "|".join(map(str, shortcuts)) + ")"
     re_pattern = ".*bindsym \$mod\+{} exec :.*".format(shortcuts_pattern)
     return re.match(re_pattern, ln) is not None
@@ -90,17 +91,34 @@ def switch_wses(
     return out_lines
 
 
-def switch_mode(mode: Mode, in_filename: str = I3_CONFIG_FILE, out_filename: str = None):
+def _parse_custom_ids(mode_str: str) -> Tuple[int]:
+    """ Expects a comma-separated list of WS IDs to _enable_ and returns their complement,
+    representing the IDs to _disable_ """
+    disable_ids = set(int(x) for x in mode_str.strip().split(","))
+    print(disable_ids)
+    assert(all(ws_id in ALL_WSES for ws_id in disable_ids))
+    return tuple(set(ALL_WSES) - disable_ids)
+
+
+def switch_mode(
+    mode_str: Mode, in_filename: str = I3_CONFIG_FILE, out_filename: str = None
+):
     out_filename = out_filename or in_filename
 
     with open(in_filename, "r") as rf:
         config_lns = rf.readlines()
 
     # TODO: This can be done in one pass. Refactor it to do so.
+    # Enable all to normalize
     config_lns = switch_wses(ALL_WSES, config_lns, enable=True)
 
-    ws_ids = DISABLED_WS_IDS_BY_MODE[mode]
-    config_lns = switch_wses(ws_ids, config_lns, enable=False)
+    key = mode_str.upper()
+    ws_ids_to_disable = (
+        DISABLED_WS_IDS_BY_MODE[Mode[key]]
+        if key in Mode
+        else _parse_custom_ids(mode_str)
+    )
+    config_lns = switch_wses(ws_ids_to_disable, config_lns, enable=False)
 
     with open(out_filename, "w") as wf:
         config_lns = wf.writelines(config_lns)
@@ -108,5 +126,5 @@ def switch_mode(mode: Mode, in_filename: str = I3_CONFIG_FILE, out_filename: str
 
 if __name__ == "__main__":
     assert len(sys.argv) == 2
-    switch_mode(Mode[sys.argv[1].upper()])
+    switch_mode(sys.argv[1])
     subprocess.check_call("i3-msg reload".split(" "))
