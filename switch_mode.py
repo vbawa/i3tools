@@ -115,7 +115,7 @@ def switch_mode(
     key = mode_str.upper()
     ws_ids_to_disable = (
         DISABLED_WS_IDS_BY_MODE[Mode[key]]
-        if key in Mode
+        if key in Mode.__dict__
         else _parse_custom_ids(mode_str)
     )
     config_lns = switch_wses(ws_ids_to_disable, config_lns, enable=False)
