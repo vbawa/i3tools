@@ -94,10 +94,9 @@ def switch_wses(
 def _parse_custom_ids(mode_str: str) -> Tuple[int]:
     """ Expects a comma-separated list of WS IDs to _enable_ and returns their complement,
     representing the IDs to _disable_ """
-    disable_ids = set(int(x) for x in mode_str.strip().split(","))
-    print(disable_ids)
-    assert(all(ws_id in ALL_WSES for ws_id in disable_ids))
-    return tuple(set(ALL_WSES) - disable_ids)
+    enable_ids = set(int(x) for x in mode_str.strip().split(","))
+    assert(all(ws_id in ALL_WSES for ws_id in enable_ids))
+    return tuple(set(ALL_WSES) - enable_ids)
 
 
 def switch_mode(
