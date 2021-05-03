@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Focuses the window whose title is a superset of the first arugment to the script.
+## Focuses the window whose title is a superset of the first argument to the script.
 ## Multiple matches picks the first one found (no order guaranteed)
 
 # TODO: Handle multiple matches better.
