@@ -59,10 +59,10 @@ NEVER_HIDE = set((9, 10))
 # TODO: This is reaaaallly slow, even slower than synchronous somehow...
 async def showWindows(windows: Iterable[i3ipc.Con], task_limit=8):
     async def show(win_id: int):
-        subprocess.call(["xprop", "-id", str(win_id), "-f",
-        "_NET_WM_STATE", "32a", "-remove", HIDDEN])
-        subprocess.call(["xprop", "-id", str(win_id), "-f",
-        "_NET_WM_STATE", "32a", "-set", "_NET_WM_STATE", SHOWN])
+        subprocess.call(f"xprop -id {win_id} -f _NET_WM_STATE 32a -remove {HIDDEN}".split(" "))
+        subprocess.call(
+            f"xprop -id {win_id} -f _NET_WM_STATE 32a -set _NET_WM_STATE {SHOWN}".split(" ")
+        )
 
     print(f"Showing {len(windows)} windows")
     for w in tqdm.tqdm(windows):
@@ -70,10 +70,10 @@ async def showWindows(windows: Iterable[i3ipc.Con], task_limit=8):
 
 async def hideWindows(windows: Iterable[int], task_limit=8):
     async def hide(win_id: int):
-        subprocess.call(["xprop", "-id", str(win_id), "-f",
-        "_NET_WM_STATE", "32a", "-remove", SHOWN])
-        subprocess.call(["xprop", "-id", str(win_id), "-f",
-        "_NET_WM_STATE", "32a", "-set", "_NET_WM_STATE", HIDDEN])
+        subprocess.call(f"xprop -id {win_id} -f _NET_WM_STATE 32a -remove {SHOWN}".split(" "))
+        subprocess.call(
+            f"xprop -id {win_id} -f _NET_WM_STATE 32a -set _NET_WM_STATE {HIDDEN}".split(" ")
+        )
 
     print(f"Hiding {len(windows)} windows")
     for w in tqdm.tqdm(windows):
