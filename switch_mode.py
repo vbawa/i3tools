@@ -36,7 +36,9 @@ ALL_WSES = tuple(range(1, 11))
 def _is_enabling_ln(ws_ids: int, ln: str):
     """ Returns whether `ln` is the line enabling the ws identified by `ws_id` """
     ws_ids_pattern = "(" + "|".join(map(str, ws_ids)) + ")"
-    re_pattern = ".*bindsym \$mod\+. workspace number {} .*".format(ws_ids_pattern)
+    # The final group means that the pattern can either terminate, or there can
+    # be a space after the number, with some more text afterwards.
+    re_pattern = ".*bindsym \$mod\+. workspace number {}(\s.*\n|\n)".format(ws_ids_pattern)
     re_match = re.match(re_pattern, ln)
     return re_match is not None
 
