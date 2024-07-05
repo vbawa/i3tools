@@ -5,9 +5,12 @@ Switches operational modes of OS by disabling workspaces.  Currently supports wo
 mode, which respectively disable recreational and work workspaces.
 
 Usage:
-    switch_mode.py MODE
+    switch_mode.py MODE_STR
 
-where MODE is either "WORK", "REC", or "ALL" (case insensitive).
+The valid modes are "WORK", "REC", and "ALL"
+MODE_STR can be a case-insensitive prefix of any of these modes. It can also
+be a comma-separated list of valid workspaces, to which the usable set of
+workspaces will be restricted.
 """
 
 import enum
