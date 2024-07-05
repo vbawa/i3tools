@@ -6,7 +6,6 @@ workspace
 """
 
 import i3ipc
-import re
 import sys
 
 from typing import List
@@ -17,14 +16,14 @@ def _get_toplevel_containers(ws: i3ipc.con.Con) -> List[i3ipc.con.Con]:
     # Crashes if there's not exactly 1 top-level container
     return [cont for cont in ws.nodes if cont.type == 'con']
 
-def main(ws_name: int):
+def main(ws_name: str):
     """ Workspaces are assumed to be prefixed
     with an integer followed by a boundary character
     This means that 1 will match "1 foo" but not "10 bar"
     """
     conn = i3ipc.Connection()
     wses = [ws for ws in conn.get_tree().workspaces() if ws.name == ws_name]
-    assert len(wses) < 2, "Could not unambiguously identify workspace"
+    assert len(wses) < 2, f"Could not unambiguously identify workspace between: {wses}"
     # Get top-level container of the first matching workspace
     tlcs = _get_toplevel_containers(wses[0]) if len(wses) else []
 
