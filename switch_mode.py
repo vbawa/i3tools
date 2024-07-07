@@ -19,7 +19,7 @@ import subprocess
 import re
 import sys
 
-from typing import Iterable, List, Tuple
+from typing import Collection, Iterable, List, Optional, Tuple
 
 I3_CONFIG_FILE = os.path.expanduser("~/.config/i3/config")
 
@@ -36,8 +36,9 @@ DISABLED_WS_IDS_BY_MODE = {
 ALL_WSES = tuple(range(1, 11))
 
 
-def _is_enabling_ln(ws_ids: int, ln: str):
-    """ Returns whether `ln` is the line enabling the ws identified by `ws_id` """
+def _is_enabling_ln(ws_ids: Iterable[int], ln: str):
+    """ Returns whether `ln` is the line enabling any of the workspaces
+    identified by ws_ids """
     ws_ids_pattern = "(" + "|".join(map(str, ws_ids)) + ")"
     # The final group means that the pattern can either terminate, or there can
     # be a space after the number, with some more text afterwards.
@@ -46,7 +47,7 @@ def _is_enabling_ln(ws_ids: int, ln: str):
     return re_match is not None
 
 
-def _is_disabling_ln(ws_ids: int, ln: str) -> bool:
+def _is_disabling_ln(ws_ids: Iterable[int], ln: str) -> bool:
     # The shortcut for workspace 10 is 0
     shortcuts = [(0 if ws_id == 10 else ws_id) for ws_id in ws_ids]
     shortcuts_pattern = "(" + "|".join(map(str, shortcuts)) + ")"
@@ -65,13 +66,13 @@ def _turn_off_ln(ln: str) -> str:
 
 
 def switch_wses(
-    ws_ids: Iterable[int], config_lns: Iterable[str], enable: bool
+    ws_ids: Collection[int], config_lns: Iterable[str], enable: bool
 ) -> List[str]:
     """ Enable or disable the provided workspace IDs """
-    if len(ws_ids) == 0:
-        return config_lns
-
     out_lines = list(config_lns)
+    if len(ws_ids) == 0:
+        return out_lines
+
     del config_lns
 
     # Enabling lines are turned on and disabling lines are turned off
@@ -105,7 +106,8 @@ def _parse_custom_ids(mode_str: str) -> Tuple[int]:
 
 
 def switch_mode(
-    mode_str: Mode, in_filename: str = I3_CONFIG_FILE, out_filename: str = None
+    mode_str: str, in_filename: str = I3_CONFIG_FILE, out_filename:
+    Optional[str] = None
 ):
     out_filename = out_filename or in_filename
 
